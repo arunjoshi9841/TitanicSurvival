@@ -1,0 +1,121 @@
+---
+title: "BU662 - Bayes Analysis - Class Project
+Name: Arun Joshi
+---
+
+
+```{r}
+#install.packages('e1071', dependencies = TRUE)
+library(class) 
+library(e1071) 
+
+```
+
+
+
+## Titanic example Contingency Table
+
+```{r}
+#install.packages('titanic', dependencies = TRUE)
+library(titanic)
+titanic_test
+str(titanic_test)
+titanic_train
+
+titanic_gender_model
+```
+
+
+```{r}
+data(Titanic)
+m <- naiveBayes(Survived ~ ., data = Titanic)
+m
+predict(m, as.data.frame(Titanic))
+Titanic
+titanic_train
+```
+
+What are the probabilities for survival for:
+
+1. a third class passenger
+2. a male first class passenger
+3. a child, third class passenger
+
+
+```{r}
+Titanic1<- as.data.frame(Titanic)
+Titanic1<-Titanic1[Titanic1$Class==3]
+m <- naiveBayes(Survived ~ ., data = Titanic)
+a<-as.data.frame(table(predict(m, as.data.frame(Titanic))))
+a
+prob= a$Freq[2]/(a$Freq[1]+a$Freq[2])
+prob
+#hence probability of death of a third class passenger is 0.5625
+```
+```{r}
+#######
+library(e1071)
+library(plyr)
+```
+
+
+```{r}
+# Load in the cleaned data sets
+load("train_clean.RData")  # 891 obs
+load("test_clean.RData")   # 418 obs
+```
+
+
+```{r}
+# Create random forest based on PCLASS, SEX, FARE, and AGE
+nb <- naiveBayes(survived ~ sex + pclass + age + fare, data = train)
+
+summary(nb)
+```
+
+```{r}
+# Save our model as a string
+model <- "naiveBayes(survived ~ sex + pclass + age + fare, data = train)"
+```
+
+
+```{r}
+# Make our prediction on the TRAIN data set [For calculating error]
+train$survived_pred <- predict(nb, train)
+```
+
+```{r}
+
+# Make our prediction on the TEST data set
+test$survived <- predict(nb, test)
+```
+
+
+```{r}
+# save csv file for submission
+write.csv(test, "naive-bayes.csv")
+```
+
+
+Plots for train data
+
+```{r}
+par(mfrow=c(1,1))
+barplot(table(train$survived_pred, train[,4]))
+legend("topleft", legend = c("Died", "Survived"), fill=c("black","grey"))
+
+barplot(table(train$survived_pred, train[,2]))
+legend("topleft", legend = c("Died", "Survived"), fill=c("black","grey"))
+```
+
+
+
+Plots (predictions) for test data
+```{r}
+par(mfrow=c(1,1))
+barplot(table(train$survived, train[,4]))
+legend("topleft", legend = c("Died", "Survived"), fill=c("black","grey"))
+
+barplot(table(train$survived, train[,2]))
+legend("topleft", legend = c("Died", "Survived"), fill=c("black","grey"))
+```
